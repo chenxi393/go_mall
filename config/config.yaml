@@ -1,0 +1,35 @@
+service:
+  mode: debug
+  http_port: 3000
+
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: 123456
+  db_name: mail_db
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: 123456
+  db_name: 2
+
+# 服务器上 redis不要暴露端口密码要设置的复杂一点
+
+# qiniu:
+#   access_key:
+#   secret_key:
+#   bucket:
+#   qiniu_sever:
+
+# email:
+# valid_email: http://localhost:8080/#/valid/email/
+# smtp_host: smtp.qq.cpm
+# smtp_email:
+# smtp_pass:
+
+path:
+  host: http://localhost
+  product: /static/imgs/product/
+  avatar: /static/imgs/avatar/
