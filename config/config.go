@@ -39,10 +39,12 @@ var (
 	RedisDbName   string
 )
 
-func init() {
+func Init() {
 	viper.SetConfigName("config")   // name of config file (without extension)
 	viper.SetConfigType("yaml")     // REQUIRED if the config file does not have the extension in the name
 	viper.AddConfigPath("./config") // optionally look for config in the working directory
+	viper.AddConfigPath("../config") // 取决于main 函数生成的可执行文件在哪
+	// 这里的路径后续还得配置 最好用环境变量什么的？？ 不让容易出错 或者决定路径
 	err := viper.ReadInConfig()     // Find and read the config file
 	if err != nil {                 // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %w", err))

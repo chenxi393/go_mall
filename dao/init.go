@@ -25,7 +25,6 @@ func Database(connRead, connWrite string) {
 	} else {
 		ormLogger = logger.Default
 	}
-	fmt.Print(connRead)
 	// 这里其实还是需要手动创建数据库
 	// TODO:调研是不是可以自动创建 虽然可能企业是手动创建
 	db, err := gorm.Open(mysql.New(
