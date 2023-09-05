@@ -7,6 +7,7 @@ import (
 	"mail/pkg/e"
 	"mail/pkg/util"
 	"mail/serializer"
+	"mime/multipart"
 )
 
 // 使用标签来映射表单数据和 JSON 数据到结构体的字段中，以及相应的数据转换和处理
@@ -113,7 +114,8 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 		}
 	}
 	// http是无状态的 不知道你是谁 需要返回一个 （认证：token）
-	// token 签发
+	// token 签发 你看这里那拿了用户ID 放放到Token里了 后面用户做什么事情
+	// 通过token里的ID就行
 	token, err := util.GenerateToken(user.ID, service.UserName, 0)
 	if err != nil {
 		return serializer.Response{
@@ -130,5 +132,85 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 			User:  serializer.BuildUser(user),
 			Token: token,
 		},
+	}
+}
+
+// / 用户修改信息
+func (service *UserService) Update(ctx context.Context, uId uint) serializer.Response {
+	var user *model.User
+	var err error
+	code := e.Success
+
+	userDao := dao.NewUserDao(ctx)
+	user, err = userDao.GetUserById(uId)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	// 修改昵称
+
+	if service.Nickname != "" {
+		user.NickName = service.Nickname
+	}
+	err = userDao.UpdateUserById(uId, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
+	}
+}
+
+// 头像更新 上传到本地
+func (service *UserService) Post(ctx context.Context, uId uint, file multipart.File, filesize int64) serializer.Response {
+	code := e.Success
+	var user *model.User
+	var err error
+	userdao := dao.NewUserDao(ctx)
+	user, err = userdao.GetUserById(uId)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	// 保存图片到本地 修改数据库的文件路径
+	path, err := UploadAvatarToLocal(file, uId, user.UserName)
+	if err != nil {
+		code = e.ErrorUpLoadFailed
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	user.Avatar = path
+	err = userdao.UpdateUserById(uId, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
 	}
 }

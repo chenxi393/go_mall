@@ -30,3 +30,19 @@ func GenerateToken(id uint, userName string, authority int) (string, error) {
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return tokenClaims.SignedString(jwtSecret)
 }
+
+// 这一块的内容 都没有学过 都是跟着敲的 还是需要继续学习一下
+// 验证用户的token
+func ParseToken(token string) (*Claims, error) {
+
+	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
+	if tokenClaims != nil {
+		if Claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+			return Claims, nil
+		}
+	}
+	return nil, err
+}
