@@ -34,10 +34,10 @@ type SendEmailService struct {
 }
 
 type ValidEmailService struct {
-	Email         string `json:"email" form:"email"`
-	Password      string `json:"password" form:"password"`
-	OperationType uint   `json:"operation_type" form:"operation_type"`
-	//1 绑定邮箱 2 解绑邮箱 3 更改密码
+}
+
+type ShowMoneyService struct {
+	Key string `json:"key" form:"key"`
 }
 
 func (service *UserService) Registe(ctx context.Context) serializer.Response {
@@ -81,7 +81,7 @@ func (service *UserService) Registe(ctx context.Context) serializer.Response {
 		NickName: service.Nickname,
 		Avatar:   "default.jpg",
 		Status:   model.Active,
-		Monery:   util.Encrypt.Getkey(), //这里省略了解密??
+		Money:    "10000", //这里省略了解密?? util.Encrypt.Getkey()
 	}
 	// 密码加密
 	if err = user.SetPassword(service.Password); err != nil {
@@ -354,5 +354,23 @@ func (service *ValidEmailService) Valid(ctx context.Context, token string) seria
 		Status: code,
 		Msg:    e.GetMsg(code),
 		Data:   serializer.BuildUser(user),
+	}
+}
+
+func (service *ShowMoneyService) Show(ctx context.Context, uid uint) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(uid)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildMoney(user, service.Key),
+		Msg:    e.GetMsg(code),
 	}
 }

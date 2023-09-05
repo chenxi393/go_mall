@@ -13,7 +13,7 @@ type User struct {
 	NickName       string `gorm:"unique"`
 	Status         string //有没有被封禁什么的
 	Avatar         string `gorm:"size:1000"`
-	Monery         string
+	Money          string
 	// 字段是又规律的  UserName user_name Username username
 }
 
