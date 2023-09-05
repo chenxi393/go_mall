@@ -2,12 +2,17 @@ package service
 
 import (
 	"context"
+	"mail/config"
 	"mail/dao"
 	"mail/model"
 	"mail/pkg/e"
 	"mail/pkg/util"
 	"mail/serializer"
 	"mime/multipart"
+	"strings"
+	"time"
+
+	"gopkg.in/mail.v2"
 )
 
 // 使用标签来映射表单数据和 JSON 数据到结构体的字段中，以及相应的数据转换和处理
@@ -19,6 +24,20 @@ type UserService struct {
 	UserName string `form:"user_name" json:"user_name"`
 	Password string `form:"password" json:"password"`
 	Key      string `form:"key" json:"key"` //暂时前端验证 一般前后端都需要验证
+}
+
+type SendEmailService struct {
+	Email         string `json:"email" form:"email"`
+	Password      string `json:"password" form:"password"`
+	OperationType uint   `json:"operation_type" form:"operation_type"`
+	//1 绑定邮箱 2 解绑邮箱 3 更改密码
+}
+
+type ValidEmailService struct {
+	Email         string `json:"email" form:"email"`
+	Password      string `json:"password" form:"password"`
+	OperationType uint   `json:"operation_type" form:"operation_type"`
+	//1 绑定邮箱 2 解绑邮箱 3 更改密码
 }
 
 func (service *UserService) Registe(ctx context.Context) serializer.Response {
@@ -62,7 +81,7 @@ func (service *UserService) Registe(ctx context.Context) serializer.Response {
 		NickName: service.Nickname,
 		Avatar:   "default.jpg",
 		Status:   model.Active,
-		Monery:   "04 28.01 这里进行初始金额的加密", //
+		Monery:   util.Encrypt.Getkey(), //这里省略了解密??
 	}
 	// 密码加密
 	if err = user.SetPassword(service.Password); err != nil {
@@ -187,7 +206,6 @@ func (service *UserService) Post(ctx context.Context, uId uint, file multipart.F
 			Error:  err.Error(),
 		}
 	}
-
 	// 保存图片到本地 修改数据库的文件路径
 	path, err := UploadAvatarToLocal(file, uId, user.UserName)
 	if err != nil {
@@ -200,6 +218,130 @@ func (service *UserService) Post(ctx context.Context, uId uint, file multipart.F
 	}
 	user.Avatar = path
 	err = userdao.UpdateUserById(uId, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
+	}
+}
+
+func (service *SendEmailService) Send(ctx context.Context, uId uint) serializer.Response {
+	code := e.Success
+	var address string
+	var notice *model.Notice
+	token, err := util.GenerateEmailToken(uId, service.OperationType, service.Email, service.Password)
+	if err != nil {
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	noticeDao := dao.NewNoticeDao(ctx)
+	// 这里时根据类型 去数据库拿通知文本 总感觉写法很奇怪
+	//还需要手动在数据库存入文本
+	notice, err = noticeDao.GetNoticeById(service.OperationType)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	address = config.Email.ValidEmail + token //发送方
+	mailStr := notice.Text
+	mailText := strings.Replace(mailStr, "Email", address, -1)
+	// -1表示替换所有 可以看If n < 0, there is no limit on the number of replacements.
+	m := mail.NewMessage()
+	m.SetHeader("From", config.Email.SMTPEmail)
+	m.SetHeader("To", service.Email)
+	m.SetHeader("Subject", "go-mail 你正在进行邮箱操作")
+	m.SetBody("text/html", mailText)
+	d := mail.NewDialer(config.Email.SMTPHost, 465, config.Email.SMTPEmail, config.Email.SMTPPass)
+	d.StartTLSPolicy = mail.MandatoryStartTLS
+	if err = d.DialAndSend(m); err != nil {
+		code = e.ErrorSendEmail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+}
+
+func (service *ValidEmailService) Valid(ctx context.Context, token string) serializer.Response {
+	var userId uint
+	var email string
+	var password string
+	var operationType uint
+	code := e.Success
+	// 验证token
+	if token == "" {
+		code = e.InvaliedParams
+	} else {
+		claims, err := util.ParseEmailToken(token)
+		//ParseEmailToken 写错了 导致err确实等于nil 但是claim 也等于nil
+		//下面时间比较会导致空指针错误
+		if err != nil || claims == nil {
+			code = e.ErrorAuthToken
+		} else if time.Now().Unix() > claims.ExpiresAt {
+			code = e.ErrorAuthToken_TimeOut
+		} else {
+			userId = claims.UserID
+			email = claims.Email
+			password = claims.Password
+			operationType = claims.OperationType
+		}
+	}
+
+	if code != e.Success {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	//获取用户的信息
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(userId)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	if operationType == 1 {
+		user.Email = email
+	} else if operationType == 2 {
+		user.Email = ""
+	} else if operationType == 3 {
+		err = user.SetPassword(password)
+		if err != nil {
+			code = e.Error
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+				Error:  err.Error(),
+			}
+		}
+	}
+	err = userDao.UpdateUserById(userId, user)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{

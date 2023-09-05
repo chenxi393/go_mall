@@ -13,6 +13,6 @@ const (
 	ErrorAuthToken          = 30005
 	ErrorAuthToken_TimeOut  = 30006
 	ErrorUpLoadFailed       = 30007
-
+	ErrorSendEmail          = 30008
 	// product模块的错误用  4XXXXX
 )

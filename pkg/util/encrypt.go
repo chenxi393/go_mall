@@ -17,6 +17,12 @@ func NewEncryption() *Encryption {
 	return &Encryption{}
 }
 
+// 这里有似乎要对key 的密钥进行一个加解密的操作
+// 这里省略了
 func (e *Encryption) Setkey(key string) {
 	e.key = key
+}
+
+func (e *Encryption) Getkey() string {
+	return e.key
 }

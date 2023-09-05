@@ -50,3 +50,24 @@ func UploadAvatar(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
 }
+
+func SendEmail(ctx *gin.Context) {
+	var sendEmail service.SendEmailService
+	claims, _ := util.ParseToken(ctx.GetHeader("Authorization"))
+	if err := ctx.ShouldBind(&sendEmail); err == nil {
+		res := sendEmail.Send(ctx.Request.Context(), claims.ID)
+		ctx.JSON(http.StatusOK, res)
+	} else {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+}
+
+func ValidEmail(ctx *gin.Context) {
+	var validEmail service.ValidEmailService
+	if err := ctx.ShouldBind(&validEmail); err == nil {
+		res := validEmail.Valid(ctx.Request.Context(), ctx.GetHeader("Authorization"))
+		ctx.JSON(http.StatusOK, res)
+	} else {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+}
