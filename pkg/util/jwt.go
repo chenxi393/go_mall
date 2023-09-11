@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// 这就是密钥 密钥保存在服务器里 能够知道传进的token是不是自己签发的
+// 这就是JWT的原理
 var jwtSecret = []byte("这是一个商城项目")
 
 type Claims struct {
@@ -31,8 +33,6 @@ func GenerateToken(id uint, userName string, authority int) (string, error) {
 	return tokenClaims.SignedString(jwtSecret)
 }
 
-// 这一块的内容 都没有学过 都是跟着敲的 还是需要继续学习一下
-// 验证用户的token
 func ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil

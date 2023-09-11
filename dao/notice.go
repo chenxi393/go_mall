@@ -12,7 +12,7 @@ type NoticeDao struct {
 }
 
 func NewNoticeDao(ctx context.Context) *NoticeDao {
-	return &NoticeDao{NewDBClient(ctx)}
+	return &NoticeDao{newDBClient(ctx)}
 }
 
 func NewNoticeDaoByDB(db *gorm.DB) *NoticeDao {

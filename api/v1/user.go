@@ -13,7 +13,8 @@ func UserRegister(ctx *gin.Context) {
 		res := userRegister.Registe(ctx.Request.Context())
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }
 
@@ -23,7 +24,8 @@ func UserLogin(ctx *gin.Context) {
 		res := userLogin.Login(ctx.Request.Context())
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }
 
@@ -34,7 +36,8 @@ func UserUpdate(ctx *gin.Context) {
 		res := userUpdate.Update(ctx.Request.Context(), claims.ID)
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }
 
@@ -47,7 +50,8 @@ func UploadAvatar(ctx *gin.Context) {
 		res := userLoadAvatar.Post(ctx.Request.Context(), claims.ID, file, filesize)
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }
 
@@ -58,7 +62,8 @@ func SendEmail(ctx *gin.Context) {
 		res := sendEmail.Send(ctx.Request.Context(), claims.ID)
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }
 
@@ -68,7 +73,8 @@ func ValidEmail(ctx *gin.Context) {
 		res := validEmail.Valid(ctx.Request.Context(), ctx.GetHeader("Authorization"))
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }
 
@@ -79,6 +85,7 @@ func ShowMoney(ctx *gin.Context) {
 		res := Show_Money.Show(ctx.Request.Context(), claims.ID)
 		ctx.JSON(http.StatusOK, res)
 	} else {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln(err)
 	}
 }

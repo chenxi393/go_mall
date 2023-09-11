@@ -12,7 +12,7 @@ type CarouselDao struct {
 }
 
 func NewCarouselDao(ctx context.Context) *CarouselDao {
-	return &CarouselDao{NewDBClient(ctx)}
+	return &CarouselDao{newDBClient(ctx)}
 }
 
 func NewCarouselDaoByDB(db *gorm.DB) *CarouselDao {

@@ -11,7 +11,7 @@ type UserDao struct {
 }
 
 func NewUserDao(ctx context.Context) *UserDao {
-	return &UserDao{NewDBClient(ctx)}
+	return &UserDao{newDBClient(ctx)}
 }
 
 // 复用连接了的db 优化性能？？ 有点不懂
