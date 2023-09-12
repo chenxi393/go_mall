@@ -13,6 +13,7 @@ var MsgFlag = map[int]string{
 	ErrorUpLoadFailed:           "图片上传失败",
 	ErrorSendEmail:              "邮件发送失败",
 	ErrorProductImagUploadError: "商品图片上传错误",
+	ErrorDeleteAddress:          "删除地址失败",
 }
 
 func GetMsg(code int) string {

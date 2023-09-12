@@ -48,6 +48,13 @@ func NewRouter() *gin.Engine {
 			// 商品操作 这里用户应该既是买家也是卖家
 			authed.POST("product", api_v1.CreatProduct)
 			authed.POST("products",api_v1.SearchProduct)
+
+			// 地址操作
+			authed.POST("address",api_v1.CreateAddress)
+			authed.GET("addresses",api_v1.GetAddresses)
+			authed.GET("addresses/:id",api_v1.GetAddress)
+			authed.DELETE("addresses/:id",api_v1.DeleteAddress)
+			authed.PUT("addresses/:id",api_v1.ModifyAddress)
 		}
 	}
 	return r

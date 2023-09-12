@@ -17,4 +17,7 @@ const (
 
 	// product模块的错误用  4XXXXX
 	ErrorProductImagUploadError = 40001
+
+	// 地址模块
+	ErrorDeleteAddress =50001
 )
