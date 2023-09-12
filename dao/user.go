@@ -24,6 +24,7 @@ func (dao *UserDao) ExistByUserName(userName string) (*model.User, bool, error) 
 	var user model.User
 	// 这里有个问题 如果上述user 声明在返回值里 为结构体指针
 	//下面first传递user 会出问题invalid value, should be pointer to struct or slice
+	// 这是因为指针会初始化为null 不能传null进First 等函数里
 	err := dao.DB.Model(&model.User{}).Where("user_name=?", userName).First(&user).Error
 	if err != nil {
 		//fmt.Println(err.Error())
