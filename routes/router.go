@@ -55,6 +55,11 @@ func NewRouter() *gin.Engine {
 			authed.GET("addresses/:id",api_v1.GetAddress)
 			authed.DELETE("addresses/:id",api_v1.DeleteAddress)
 			authed.PUT("addresses/:id",api_v1.ModifyAddress)
+
+			// 收藏夹 这里有外键要注意 插入时 外键必须在别的表已经存在
+			authed.POST("favorites",api_v1.CreateFavorites)
+			authed.DELETE("favorites/:id",api_v1.DeleteFavorites)
+			authed.GET("favorites",api_v1.GetFavorites)
 		}
 	}
 	return r

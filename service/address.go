@@ -56,11 +56,7 @@ func (service *AddressService) GetAll(ctx context.Context, uid uint) serializer.
 			Error:  err.Error(),
 		}
 	}
-	return serializer.Response{
-		Status: code,
-		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildAddresses(addresses),
-	}
+	return serializer.BuildListResponse(serializer.BuildAddresses(addresses), uint(len(addresses)))
 }
 
 func (service *AddressService) GetAddressById(ctx context.Context, uid uint, addressId string) serializer.Response {
@@ -76,6 +72,7 @@ func (service *AddressService) GetAddressById(ctx context.Context, uid uint, add
 			Error:  err.Error(),
 		}
 	}
+	
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
