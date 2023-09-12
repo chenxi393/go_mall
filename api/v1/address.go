@@ -32,8 +32,9 @@ func GetAddresses(ctx *gin.Context) {
 
 func GetAddress(ctx *gin.Context) {
 	var address service.AddressService
+	claims, _ := util.ParseToken(ctx.GetHeader("Authorization"))
 	if err := ctx.ShouldBind(&address); err == nil {
-		res := address.GetAddressById(ctx.Request.Context(), ctx.Param("id"))
+		res := address.GetAddressById(ctx.Request.Context(), claims.ID, ctx.Param("id"))
 		ctx.JSON(http.StatusOK, res)
 	} else {
 		ctx.JSON(http.StatusBadRequest, err)
@@ -42,18 +43,20 @@ func GetAddress(ctx *gin.Context) {
 
 func DeleteAddress(ctx *gin.Context) {
 	var address service.AddressService
+	claims, _ := util.ParseToken(ctx.GetHeader("Authorization"))
 	if err := ctx.ShouldBind(&address); err == nil {
-		res := address.DeleteAddressById(ctx.Request.Context(), ctx.Param("id"))
+		res := address.DeleteAddressById(ctx.Request.Context(), claims.ID, ctx.Param("id"))
 		ctx.JSON(http.StatusOK, res)
 	} else {
 		ctx.JSON(http.StatusBadRequest, err)
 	}
 }
 
-func ModifyAddress(ctx *gin.Context){
+func ModifyAddress(ctx *gin.Context) {
 	var address service.AddressService
+	claims, _ := util.ParseToken(ctx.GetHeader("Authorization"))
 	if err := ctx.ShouldBind(&address); err == nil {
-		res := address.ModifyAddressById(ctx.Request.Context(), ctx.Param("id"))
+		res := address.ModifyAddressById(ctx.Request.Context(), claims.ID, ctx.Param("id"))
 		ctx.JSON(http.StatusOK, res)
 	} else {
 		ctx.JSON(http.StatusBadRequest, err)

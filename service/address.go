@@ -63,10 +63,10 @@ func (service *AddressService) GetAll(ctx context.Context, uid uint) serializer.
 	}
 }
 
-func (service *AddressService) GetAddressById(ctx context.Context, addressId string) serializer.Response {
+func (service *AddressService) GetAddressById(ctx context.Context, uid uint, addressId string) serializer.Response {
 	code := e.Success
 	addressDao := dao.NewAddressDao(ctx)
-	address, err := addressDao.GetAddressById(addressId)
+	address, err := addressDao.GetAddressById(uid, addressId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln(err)
@@ -83,12 +83,12 @@ func (service *AddressService) GetAddressById(ctx context.Context, addressId str
 	}
 }
 
-func (service *AddressService) DeleteAddressById(ctx context.Context, addressId string) serializer.Response {
+func (service *AddressService) DeleteAddressById(ctx context.Context, uid uint, addressId string) serializer.Response {
 	code := e.Success
 	addressDao := dao.NewAddressDao(ctx)
 	// 软删除了之后再删除 GORM也不会报错
 	// 应该在删除之前 先检查有没有
-	_, err := addressDao.GetAddressById(addressId)
+	_, err := addressDao.GetAddressById(uid, addressId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln(err)
@@ -98,7 +98,7 @@ func (service *AddressService) DeleteAddressById(ctx context.Context, addressId 
 			Error:  err.Error(),
 		}
 	}
-	err = addressDao.DeleteAddressById(addressId)
+	err = addressDao.DeleteAddressById(uid, addressId)
 	if err != nil {
 		code = e.ErrorDeleteAddress
 		util.LogrusObj.Infoln(err)
@@ -114,7 +114,7 @@ func (service *AddressService) DeleteAddressById(ctx context.Context, addressId 
 	}
 }
 
-func (service *AddressService) ModifyAddressById(ctx context.Context, addressId string) serializer.Response {
+func (service *AddressService) ModifyAddressById(ctx context.Context, uid uint, addressId string) serializer.Response {
 	code := e.Success
 	addressDao := dao.NewAddressDao(ctx)
 	addr_map := make(map[string]interface{})
@@ -122,7 +122,7 @@ func (service *AddressService) ModifyAddressById(ctx context.Context, addressId 
 	addr_map["phone"] = service.Phone
 	addr_map["address"] = service.Address
 	// 这里其实也应该判断存不存在
-	err := addressDao.ModifyAddressById(addr_map,addressId)
+	err := addressDao.ModifyAddressById(addr_map, uid, addressId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln(err)
@@ -132,7 +132,7 @@ func (service *AddressService) ModifyAddressById(ctx context.Context, addressId 
 			Error:  err.Error(),
 		}
 	}
-	address, err := addressDao.GetAddressById(addressId)
+	address, err := addressDao.GetAddressById(uid, addressId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln(err)

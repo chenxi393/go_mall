@@ -29,17 +29,17 @@ func (dao *AddressDao) GetAddresss(uid uint) ([]*model.Address, error) {
 	return Addresses, err
 }
 
-func (dao *AddressDao) GetAddressById(id string) (*model.Address, error) {
+func (dao *AddressDao) GetAddressById(uid uint, id string) (*model.Address, error) {
 	var Address *model.Address
-	err := dao.Model(&model.Address{}).Where("id = ? ", id).First(&Address).Error
+	err := dao.Model(&model.Address{}).Where("id = ? AND user_id = ?", id, uid).First(&Address).Error
 	return Address, err
 }
 
-func (dao *AddressDao) DeleteAddressById(id string) error {
+func (dao *AddressDao) DeleteAddressById(uid uint, id string) error {
 	var Address *model.Address
-	return dao.Model(&model.Address{}).Where("id = ? ", id).Delete(&Address).Error
+	return dao.Model(&model.Address{}).Where("id = ? AND user_id = ?", id, uid).Delete(&Address).Error
 }
 
-func (dao *AddressDao) ModifyAddressById(addr map[string]interface{}, id string) error {
-	return dao.Model(&model.Address{}).Where("id = ?", id).Updates(&addr).Error
+func (dao *AddressDao) ModifyAddressById(addr map[string]interface{}, uid uint, id string) error {
+	return dao.Model(&model.Address{}).Where("id = ? AND user_id = ?", id, uid).Updates(&addr).Error
 }
