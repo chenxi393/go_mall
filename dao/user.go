@@ -11,7 +11,7 @@ type UserDao struct {
 }
 
 func NewUserDao(ctx context.Context) *UserDao {
-	return &UserDao{NewDBClient(ctx)}
+	return &UserDao{newDBClient(ctx)}
 }
 
 // 复用连接了的db 优化性能？？ 有点不懂
@@ -37,4 +37,16 @@ func (dao *UserDao) ExistByUserName(userName string) (*model.User, bool, error) 
 
 func (dao *UserDao) CreatUser(user *model.User) error {
 	return dao.DB.Model(&model.User{}).Create(user).Error
+}
+
+// GetUserById 根据ID获取user
+func (dao *UserDao) GetUserById(id uint) (*model.User, error) {
+	var user model.User
+	err := dao.DB.Model(&model.User{}).Where("id = ?", id).First(&user).Error
+	return &user, err
+}
+
+// UpdateUserById 通过ID更新user
+func (dao *UserDao) UpdateUserById(id uint, user *model.User) error {
+	return dao.DB.Model(&model.User{}).Where("id = ?", id).Updates(&user).Error
 }

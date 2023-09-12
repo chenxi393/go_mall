@@ -10,8 +10,7 @@ mysql:
   db_name: mall_db
 
 redis:
-  host: 127.0.0.1
-  port: 6379
+  address: 127.0.0.1:6379
   password: 123456
   db_name: 2
 
@@ -23,11 +22,12 @@ redis:
 #   bucket:
 #   qiniu_sever:
 
-# email:
-# valid_email: http://localhost:8080/#/valid/email/
-# smtp_host: smtp.qq.cpm
-# smtp_email:
-# smtp_pass:
+# 相当于管理员邮箱 用户敏感操作时 发邮箱给用户确认
+email:
+  valid_email: http://localhost:8080/#/valid/email/
+  smtp_host: smtp.qq.com
+  smtp_email: 1578477681@qq.com
+  smtp_pass: idkdoqhdwtoshgcj
 
 path:
   host: http://localhost

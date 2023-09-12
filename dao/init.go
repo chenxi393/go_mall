@@ -3,6 +3,8 @@ package dao
 import (
 	"context"
 	"fmt"
+	"mail/config"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +17,37 @@ import (
 
 var _db *gorm.DB //全局的db连接 下面赋值了 和下面的是一样的
 
-func Database(connRead, connWrite string) {
+func init() {
+	// TODO:读写分离
+	// mysql 读 （读写分离） 大部分都是数据库读的操作 主从中的主
+	connRead := strings.Join([]string{
+		config.Db_mysql.User,
+		":",
+		config.Db_mysql.Password,
+		"@tcp(",
+		config.Db_mysql.Host,
+		":",
+		config.Db_mysql.Port,
+		")/",
+		config.Db_mysql.DBName,
+		"?charset=utf8mb4&parseTime=true"}, "")
+	// 主从复制
+	connWrite := strings.Join([]string{
+		config.Db_mysql.User,
+		":",
+		config.Db_mysql.Password,
+		"@tcp(",
+		config.Db_mysql.Host,
+		":",
+		config.Db_mysql.Port,
+		")/",
+		config.Db_mysql.DBName,
+		"?charset=utf8mb4&parseTime=true"}, "")
+	// DSN 格式  data source name
+	//username:password@protocol(address)/dbname?param=value
+	// 具体命名规则可以看 https://github.com/go-sql-driver/mysql#dsn-data-source-name
+
+
 	//自己测试过了 这里gin.Mode 默认就是debug
 	// debug模式 会打印详细的日志
 	// else那 不打印日志 建表之前试的
@@ -65,7 +97,7 @@ func Database(connRead, connWrite string) {
 }
 
 // 这一段还不知道干嘛的
-func NewDBClient(ctx context.Context) *gorm.DB {
+func newDBClient(ctx context.Context) *gorm.DB {
 	db := _db
 	return db.WithContext(ctx)
 }
