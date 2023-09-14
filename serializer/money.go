@@ -5,17 +5,21 @@ import (
 	"mail/pkg/util"
 )
 
-type Monery struct {
+type Money struct {
 	UserId    uint   `json:"user_id" form:"user_id"`
 	UserName  string `json:"user_name" form:"user_name"`
 	UserMoney string `json:"user_money" form:"user_money"`
 }
 
-func BuildMoney(user *model.User, key string) Monery {
-	util.Encrypt.Setkey(key) //把当前的key放进去
-	return Monery{
+func BuildMoney(user *model.User, key string) Money {
+	m,err:=util.Encrypt.GetOriginMoney(key,user.Money)
+	if err!=nil{
+		util.LogrusObj.Infoln(err)
+		return Money{}
+	}
+	return Money{
 		UserId:    user.ID,
 		UserName:  user.UserName,
-		UserMoney: user.Money, //这里省略了上面解密的过程
+		UserMoney: m,
 	}
 }

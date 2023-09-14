@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"mail/dao"
 	"mail/model"
@@ -22,6 +23,7 @@ type OrderService struct {
 	BossId    uint    `form:"boss_id" json:"boss_id"`
 	Type      uint    `form:"type" json:"type"`
 	OrderNum  uint    `form:"order_num" json:"order_num"`
+	Key       string  `form:"key" json:"key"`
 	model.BasePage
 }
 
@@ -105,7 +107,10 @@ func (service *OrderService) GetOrders(ctx context.Context, uid uint) serializer
 func (service *OrderService) GetOrderById(ctx context.Context, uid uint, oid string) serializer.Response {
 	code := e.Success
 	orderDao := dao.NewOrderDao(ctx)
-	order, err := orderDao.GetOrderById(uid, oid)
+	condition := make(map[string]interface{})
+	condition["user_id"] = uid
+	condition["id"] = oid
+	order, err := orderDao.GetOrderByCondition(condition)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln(err)
@@ -160,6 +165,102 @@ func (service *OrderService) DeleteOrderById(ctx context.Context, uid uint, oid 
 			Error:  err.Error(),
 		}
 	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+}
+
+func (service *OrderService) PayDown(ctx context.Context, uid uint) serializer.Response {
+	code := e.Success
+	orderDao := dao.NewOrderDao(ctx)
+	condition := make(map[string]interface{})
+	condition["user_id"] = uid
+	condition["order_num"] = service.OrderNum
+	tx := orderDao.Begin()
+	order, err := orderDao.GetOrderByCondition(condition)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	// 这里的money我觉得就是总额 怎么可能再乘num
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(uid)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	money, err := util.Encrypt.GetOriginMoney(service.Key, user.Money)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	moneyFloat, err := strconv.ParseFloat(money, 64)
+	util.LogrusObj.Infoln(err)
+	remainMoney := moneyFloat - order.Money
+	if remainMoney < 0 {
+		tx.Rollback()
+		code = e.Error
+		util.LogrusObj.Infoln(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  errors.New("余额不足").Error(),
+		}
+
+	}
+	mm := fmt.Sprintf("%f", remainMoney)
+	util.Encrypt.Setkey(service.Key, mm)
+	user.Money = util.Encrypt.Getkey()
+	err = userDao.UpdateUserById(uid, user)
+	if err != nil {
+		tx.Rollback()
+		code = e.Error
+		util.LogrusObj.Infoln(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	_, err = userDao.GetUserById(order.BossID)
+	if err != nil {
+		tx.Rollback()
+		code = e.Error
+		util.LogrusObj.Infoln(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	// 完了 这里拿不到商家的支付密码 视频里是怎么解密的
+	// 视频里也是拿用户的支付密码解密的 666
+	// 拿不到就无法对商家的金额进行操作
+	//moneyBoss ,err:= util.Encrypt.GetOriginMoney(service.Key, boss.Money)
+	// 2. 商家加钱
+	// 3. 商品数量减一 欸之前下单的时候有没有确定商品数量够不够
+	// 视频弹幕说 事务写法有问题  上面都TODO
+	// 4. 删除已支付订单 软删 改成已支付就行
+
+	// 这里逻辑太拉了 商城应该是后续发货 而不是5. 自己的商品加一？？
+	// 还是后续看看抖音的项目吧
+	tx.Commit()
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),

@@ -53,11 +53,19 @@ func (service *UserService) Registe(ctx context.Context) serializer.Response {
 	}
 
 	// 10000 -> 密文存储 对称加密操作 不能直接存储金额
-	util.Encrypt.Setkey(service.Key)
-
+	// TODO 这里是那支付密码来加密10000？？余额
+	err:=util.Encrypt.Setkey(service.Key, "10000")
+	if err!=nil{
+		util.LogrusObj.Infoln(err)
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  "加密失败",
+		}
+	}
 	// 把上下文信息传递进去
 	userDao := dao.NewUserDao(ctx)
-
 	_, exist, err := userDao.ExistByUserName(service.UserName)
 	// 出错了
 	if err != nil {
@@ -81,7 +89,7 @@ func (service *UserService) Registe(ctx context.Context) serializer.Response {
 		NickName: service.Nickname,
 		Avatar:   "default.jpg",
 		Status:   model.Active,
-		Money:    "10000", //这里省略了解密?? util.Encrypt.Getkey()
+		Money:    util.Encrypt.Getkey(),
 	}
 	// 密码加密
 	if err = user.SetPassword(service.Password); err != nil {
