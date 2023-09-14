@@ -60,6 +60,13 @@ func NewRouter() *gin.Engine {
 			authed.POST("favorites",api_v1.CreateFavorites)
 			authed.DELETE("favorites/:id",api_v1.DeleteFavorites)
 			authed.GET("favorites",api_v1.GetFavorites)
+
+			// 订单操作
+			authed.POST("orders",api_v1.CreateOrders)
+			authed.GET("orders",api_v1.GetOrders)
+			authed.GET("orders/:id",api_v1.GetOrderById)
+			authed.DELETE("orders/:id",api_v1.DeleteOrderById)
+			//authed.POST("paydown",api_v1.PayDown)
 		}
 	}
 	return r
