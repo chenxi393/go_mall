@@ -1,9 +1,10 @@
-module mail
+module mail //这里最开始笔误了 应该是mall
 
 go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/redis/go-redis/v9 v9.1.0
 	github.com/spf13/viper v1.16.0
 	golang.org/x/crypto v0.9.0
 	gorm.io/driver/mysql v1.5.1
@@ -29,7 +30,6 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/redis/go-redis/v9 v9.1.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect

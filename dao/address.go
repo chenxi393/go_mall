@@ -37,6 +37,7 @@ func (dao *AddressDao) GetAddressById(uid uint, id string) (*model.Address, erro
 
 func (dao *AddressDao) DeleteAddressById(uid uint, id string) error {
 	var Address *model.Address
+	// 查数据库时 WHERE主键要在前面 主键索引
 	return dao.Model(&model.Address{}).Where("id = ? AND user_id = ?", id, uid).Delete(&Address).Error
 }
 
