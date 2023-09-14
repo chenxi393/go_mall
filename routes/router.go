@@ -29,7 +29,7 @@ func NewRouter() *gin.Engine {
 		v1.GET("carousels", api_v1.ListCarousel)
 
 		// 商品操作
-		v1.GET("products",api_v1.ListProduct) //可以分页查看 
+		v1.GET("products", api_v1.ListProduct) //可以分页查看
 		v1.GET("product/:id", api_v1.GetProduct)
 		v1.GET("imgs/:id", api_v1.GetProductImgs)
 		v1.GET("categories", api_v1.GetCategories)
@@ -47,26 +47,26 @@ func NewRouter() *gin.Engine {
 
 			// 商品操作 这里用户应该既是买家也是卖家
 			authed.POST("product", api_v1.CreatProduct)
-			authed.POST("products",api_v1.SearchProduct)
+			authed.POST("products", api_v1.SearchProduct)
 
 			// 地址操作
-			authed.POST("address",api_v1.CreateAddress)
-			authed.GET("addresses",api_v1.GetAddresses)
-			authed.GET("addresses/:id",api_v1.GetAddress)
-			authed.DELETE("addresses/:id",api_v1.DeleteAddress)
-			authed.PUT("addresses/:id",api_v1.ModifyAddress)
+			authed.POST("address", api_v1.CreateAddress)
+			authed.GET("addresses", api_v1.GetAddresses)
+			authed.GET("addresses/:id", api_v1.GetAddress)
+			authed.DELETE("addresses/:id", api_v1.DeleteAddress)
+			authed.PUT("addresses/:id", api_v1.ModifyAddress)
 
 			// 收藏夹 这里有外键要注意 插入时 外键必须在别的表已经存在
-			authed.POST("favorites",api_v1.CreateFavorites)
-			authed.DELETE("favorites/:id",api_v1.DeleteFavorites)
-			authed.GET("favorites",api_v1.GetFavorites)
+			authed.POST("favorites", api_v1.CreateFavorites)
+			authed.DELETE("favorites/:id", api_v1.DeleteFavorites)
+			authed.GET("favorites", api_v1.GetFavorites)
 
 			// 订单操作
-			authed.POST("orders",api_v1.CreateOrders)
-			authed.GET("orders",api_v1.GetOrders)
-			authed.GET("orders/:id",api_v1.GetOrderById)
-			authed.DELETE("orders/:id",api_v1.DeleteOrderById)
-			//authed.POST("paydown",api_v1.PayDown)
+			authed.POST("orders", api_v1.CreateOrders)
+			authed.GET("orders", api_v1.GetOrders)
+			authed.GET("orders/:id", api_v1.GetOrderById)
+			authed.DELETE("orders/:id", api_v1.DeleteOrderById)
+			authed.POST("paydown", api_v1.OrderPay)
 		}
 	}
 	return r

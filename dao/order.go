@@ -34,9 +34,9 @@ func (dao *OrderDao) GetOrders(condition map[string]interface{}, page model.Base
 	return Orderes, cnt, err
 }
 
-func (dao *OrderDao) GetOrderById(uid uint, id string) (*model.Order, error) {
+func (dao *OrderDao) GetOrderByCondition(condition map[string]interface{}) (*model.Order, error) {
 	var Order *model.Order
-	err := dao.Model(&model.Order{}).Where("id = ? AND user_id = ?", id, uid).First(&Order).Error
+	err := dao.Model(&model.Order{}).First(&Order, condition).Error
 	return Order, err
 }
 
